@@ -18,41 +18,43 @@ public class App {
         SalesPromotion salesPromotion = salesPromotionRepository.findAll().get(1);
         List<String> relatedItems = salesPromotion.getRelatedItems();
         List<Item> items = itemRepository.findAll();
-        double priceA=halfPrice(inputs,relatedItems);
-        double priceB=fullReduction(inputs);
+        int priceA=halfPrice(inputs,relatedItems);
+        int priceB=fullReduction(inputs);
+        int normal = normalPrice(inputs);
         String a;
-        if(priceA>=priceB&&priceB>=30){
+        if(normal >= 30 && priceA >= priceB){
             a="============= Order details =============\n" +
                     toStringInput(inputs)+
                     "-----------------------------------\n" +
                     "Promotion used:\n" +
-                    "满30减6 yuan，saving"+(normalPrice(inputs)-fullReduction(inputs))+"yuan\n" +
+                    "满30减6 yuan，saving "+ (normal-priceB)+" yuan\n" +
                     "-----------------------------------\n" +
-                    "Total:"+fullReduction(inputs)+"yuan\n" +
+                    "Total:"+priceB+" yuan\n" +
                     "===================================";
-        }else if(priceA<priceB){
+        } else if(priceA<priceB){
             a="============= Order details =============\n" +
                     toStringInput(inputs)+
                     "-----------------------------------\n" +
                     "Promotion used:\n" +
-                    "Half price for certain dishes (Braised chicken，Cold noodles)，saving"+(normalPrice(inputs)-halfPrice(inputs,relatedItems))+"yuan\n" +
+                    "Half price for certain dishes (Braised chicken，Cold noodles)，saving "+(normalPrice(inputs)-halfPrice(inputs,relatedItems))+" yuan\n" +
                     "-----------------------------------\n" +
-                    "Total:"+halfPrice(inputs,relatedItems)+"yuan\n" +
+                    "Total:"+halfPrice(inputs,relatedItems)+" yuan\n" +
                     "===================================";
         }else{
             a="============= Order details =============\n" +
                     toStringInput(inputs)+
                     "-----------------------------------\n" +
-                    "Total:"+normalPrice(inputs)+"yuan\n" +
+                    "Total:"+normalPrice(inputs)+" yuan\n" +
                     "===================================";
         }
 
         System.out.println(a);
         return a;
     }
-    public double halfPrice(List<String> inputs,List<String> relatedItems){
-        double totalPrice=0;
+    public int halfPrice(List<String> inputs,List<String> relatedItems){
+        int totalPrice=0;
         for (String commodity : inputs) {
+            commodity = commodity.replace(" ","");
             String commodityId = commodity.split("x")[0];
             String commodityCount = commodity.split("x")[1];
             Item item=getItemById(commodityId,itemRepository.findAll());
@@ -64,13 +66,14 @@ public class App {
         }
         return totalPrice;
     }
-    public double fullReduction(List<String> inputs){
-        double totalPrice=0;
+    public int fullReduction(List<String> inputs){
+        int totalPrice=0;
         for (String commodity : inputs) {
+            commodity = commodity.replace(" ","");
             String commodityId = commodity.split("x")[0];
             String commodityCount = commodity.split("x")[1];
             Item item=getItemById(commodityId,itemRepository.findAll());
-            totalPrice+=item.getPrice()*Double.parseDouble(commodityCount);
+            totalPrice+=item.getPrice()*Integer.parseInt(commodityCount);
         }
         totalPrice=totalPrice-(totalPrice/30)*6;
         return totalPrice;
@@ -86,16 +89,18 @@ public class App {
     public String toStringInput(List<String> inputs){
         String input="";
         for (String commodity : inputs) {
+            commodity = commodity.replace(" ","");
             String commodityId = commodity.split("x")[0];
             String commodityCount = commodity.split("x")[1];
             Item item=getItemById(commodityId,itemRepository.findAll());
-            input+=item.getName()+"x"+commodityCount+"="+item.getPrice()*Double.parseDouble(commodityCount)+"yuan\n";
+            input+=item.getName()+" x "+commodityCount+" = "+(int)(item.getPrice()*Integer.parseInt(commodityCount))+" yuan\n";
         }
         return input;
     }
-    public double normalPrice(List<String> inputs){
-        double totalPrice=0;
+    public int normalPrice(List<String> inputs){
+        int totalPrice=0;
         for (String commodity : inputs) {
+            commodity = commodity.replace(" ","");
             String commodityId = commodity.split("x")[0];
             String commodityCount = commodity.split("x")[1];
             Item item=getItemById(commodityId,itemRepository.findAll());
